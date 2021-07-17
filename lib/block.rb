@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Provides an abstraction for performing boolean operations on a numerical range.
 # Used for calculating the interaction of free and busy time periods on a schedule.
 #
@@ -16,24 +18,25 @@
 #   Block.new(5, 25) - Block.new(10, 20) == [Block.new(5, 10), Block.new(20, 25)]
 #
 class Block
-
-  def initialize (from, to)
+  def initialize(from, to)
     if to < from
-      @start, @end = to, from
+      @start = to
+      @end = from
     else
-      @start, @end = from, to
+      @start = from
+      @end = to
     end
   end
 
   def inspect
-    { :start => self.start, :end => self.end }.inspect
+    { start: start, end: self.end }.inspect
   end
 
   attr_reader :start, :end
 
-  alias :top :start
+  alias top start
 
-  alias :bottom :end
+  alias bottom end
 
   # ==========
   # = Length =
@@ -47,15 +50,15 @@ class Block
   # = Comparison =
   # ==============
 
-  def == (other)
+  def ==(other)
     top == other.top && bottom == other.bottom
   end
 
-  def <=> (other)
+  def <=>(other)
     [top, bottom] <=> [other.top, other.bottom]
   end
 
-  def include? (n)
+  def include?(n)
     top <= n && bottom >= n
   end
 
@@ -65,29 +68,29 @@ class Block
 
   # This block entirely surrounds the other block.
 
-  def surrounds? (other)
+  def surrounds?(other)
     other.top > top && other.bottom < bottom
   end
 
-  def covers? (other)
+  def covers?(other)
     other.top >= top && other.bottom <= bottom
   end
 
   # This block intersects with the top of the other block.
 
-  def intersects_top? (other)
+  def intersects_top?(other)
     top <= other.top && other.include?(bottom)
   end
 
   # This block intersects with the bottom of the other block.
 
-  def intersects_bottom? (other)
+  def intersects_bottom?(other)
     bottom >= other.bottom && other.include?(top)
   end
 
   # This block overlaps with any part of the other block.
 
-  def overlaps? (other)
+  def overlaps?(other)
     include?(other.top) || other.include?(top)
   end
 
@@ -97,61 +100,61 @@ class Block
 
   # A block encompassing both this block and the other.
 
-  def union (other)
+  def union(other)
     Block.new([top, other.top].min, [bottom, other.bottom].max)
   end
 
   # A two element array of blocks created by cutting the other block out of this one.
 
-  def split (other)
+  def split(other)
     [Block.new(top, other.top), Block.new(other.bottom, bottom)]
   end
 
   # A block created by cutting the top off this block.
 
-  def trim_from (new_top)
+  def trim_from(new_top)
     Block.new(new_top, bottom)
   end
 
   # A block created by cutting the bottom off this block.
 
-  def trim_to (new_bottom)
+  def trim_to(new_bottom)
     Block.new(top, new_bottom)
   end
 
-  def limited (limiter)
+  def limited(limiter)
     Block.new([top, limiter.top].max, [bottom, limiter.bottom].min)
   end
 
-  def padded (top_padding, bottom_padding)
+  def padded(top_padding, bottom_padding)
     Block.new(top - [top_padding, 0].max, bottom + [bottom_padding, 0].max)
   end
 
   # =============
   # = Operators =
   # =============
-  
+
   # Return the result of adding the other Block (or Blocks) to self.
 
-  def add (other)
+  def add(other)
     # Implement.
   end
-  
+
   # Return the result of subtracting the other Block (or Blocks) from self.
 
-  def subtract (other)
+  def subtract(other)
     # Implement.
   end
 
-  alias :- :subtract
+  alias - subtract
 
-  alias :+ :add
+  alias + add
 
   # An array of blocks created by adding each block to the others.
 
-  def self.merge (blocks)
-    blocks.sort_by(&:top).inject([]) do |blocks, b|
-      if blocks.length > 0 && blocks.last.overlaps?(b)
+  def self.merge(blocks_array)
+    blocks_array.sort_by(&:top).inject([]) do |blocks, b|
+      if !blocks.empty? && blocks.last.overlaps?(b)
         blocks[0...-1] + (blocks.last + b)
       else
         blocks + [b]
@@ -159,7 +162,7 @@ class Block
     end
   end
 
-  def merge (others)
+  def merge(others)
     # Implement.
   end
 end
