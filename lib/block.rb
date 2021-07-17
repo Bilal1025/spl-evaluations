@@ -28,6 +28,10 @@ class Block
     end
   end
 
+  def self.init_from_block(other)
+    Block.new(other.start, other.end)
+  end
+
   def inspect
     { start: start, end: self.end }.inspect
   end
@@ -137,7 +141,12 @@ class Block
   # Return the result of adding the other Block (or Blocks) to self.
 
   def add(other)
-    # Implement.
+    return [Block.new(top, bottom)] if surrounds?(other)
+    return [Block.init_from_block(other)] if other.surrounds?(self)
+    return [Block.new(top, other.bottom)] if intersects_top?(other)
+    return [Block.new(other.top, bottom)] if other.intersects_top?(self)
+
+    [Block.init_from_block(other), Block.init_from_block(self)]
   end
 
   # Return the result of subtracting the other Block (or Blocks) from self.
