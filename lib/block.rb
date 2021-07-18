@@ -152,7 +152,20 @@ class Block
   # Return the result of subtracting the other Block (or Blocks) from self.
 
   def subtract(other)
-    # Implement.
+    if other.is_a?(Block)
+      return [Block.new(top, other.top), Block.new(bottom, other.bottom)] if surrounds?(other)
+      return [] if other.covers?(self)
+      return [Block.new(other.bottom, bottom)] if other.intersects_top?(self)
+
+      [Block.new(start, other.start)]
+    else
+      result = [self]
+      other.each do |s|
+        result[-1] = result[-1] - s
+        result.flatten!
+      end
+      result
+    end
   end
 
   alias - subtract
@@ -172,6 +185,6 @@ class Block
   end
 
   def merge(others)
-    # Implement.
+    Block.merge([self, others].flatten)
   end
 end
